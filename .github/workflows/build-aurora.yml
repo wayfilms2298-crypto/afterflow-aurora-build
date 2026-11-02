@@ -1,0 +1,68 @@
+name: Build Afterflow Aurora (Windows)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'afterflow_aurora/**'
+      - '.github/workflows/build-aurora.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Windows .geode
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out Aurora project
+        uses: actions/checkout@v4
+        with:
+          path: aurora-kit
+
+      - name: Check out matching Afterflow source
+        uses: actions/checkout@v4
+        with:
+          repository: afterflow-gd/afterflow
+          ref: 1ea283fde439f2cc418cce26eed6a097808c6336
+          path: afterflow-source
+          persist-credentials: false
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Apply Aurora and verify patch
+        shell: pwsh
+        run: |
+          $patch = "$env:GITHUB_WORKSPACE/aurora-kit/afterflow_aurora/apply_aurora.py"
+          $dependency = "$env:GITHUB_WORKSPACE/aurora-kit/afterflow_aurora/slate_core.py"
+          $source = "$env:GITHUB_WORKSPACE/afterflow-source"
+          if (!(Test-Path $patch) -or !(Test-Path $dependency)) {
+            throw "Aurora patch scripts are missing from afterflow_aurora/. Upload both Python files to that folder."
+          }
+          python $patch $source
+          if ($LASTEXITCODE -ne 0) { throw "Aurora patch failed; see the errors above." }
+          if (!(Select-String -Path "$source/src/main.cpp" -Pattern 'AURORA_EXTENSION_V1' -Quiet)) {
+            throw "The source was not upgraded; refusing to build original Afterflow."
+          }
+
+      - name: Build using Geode
+        uses: geode-sdk/build-geode-mod@main
+        id: build
+        with:
+          path: afterflow-source
+          sdk: given
+          target: Win64
+          build-config: Release
+
+      - name: Publish compiled mod
+        uses: actions/upload-artifact@v4
+        with:
+          name: Afterflow-Aurora-Windows
+          path: ${{ steps.build.outputs.build-output }}
+          if-no-files-found: error
+          retention-days: 14
