@@ -614,6 +614,157 @@ def update(root: Path):
         src = r(src, 'CCNode* m_commandsPane = nullptr;', 'CCNodeRGBA* m_commandsPane = nullptr;', 'RGBA commands page')
         src = src.replace('m_insightsPane = CCNode::create();', 'm_insightsPane = CCNodeRGBA::create();')
         src = src.replace('m_commandsPane = CCNode::create();', 'm_commandsPane = CCNodeRGBA::create();')
+
+        # AURORA_VISUAL_POLISH_V2
+        # Large type, quiet surfaces, compact status, readable stage geometry.
+        # This is applied to the finished Aurora source, not the original binary.
+        src = r(src, 'constexpr float FONT_SCALE_BOOST = 1.0f;',
+            'constexpr float FONT_SCALE_BOOST = 1.14f;', 'visual: typography contrast')
+        src = r(src, 'constexpr float DECK_RADIUS = 27.f;',
+            'constexpr float DECK_RADIUS = 20.f;', 'visual: shell curvature')
+        src = r(src, 'constexpr float CARD_RADIUS = 19.f;',
+            'constexpr float CARD_RADIUS = 15.f;', 'visual: pane curvature')
+        src = r(src, 'constexpr float CARD_BOTTOM = 76.f;',
+            'constexpr float CARD_BOTTOM = 52.f;', 'visual: reclaim bottom whitespace')
+        src = r(src, 'constexpr float STAGE_META_Y = 274.f;',
+            'constexpr float STAGE_META_Y = 282.f;', 'visual: compact stage heading')
+        src = r(src, 'constexpr float STAGE_TRACK_Y = 212.f;',
+            'constexpr float STAGE_TRACK_Y = 218.f;', 'visual: preset selector position')
+        src = r(src, 'constexpr float STAGE_BAR_X = 430.f;',
+            'constexpr float STAGE_BAR_X = 388.f;', 'visual: wider bar region')
+        src = r(src, 'constexpr float STAGE_HINT_Y = 94.f;',
+            'constexpr float STAGE_HINT_Y = 76.f;', 'visual: footer position')
+
+        src = r(src,
+            'drawCurvedRect(m_shell, CCRect(-12.f, -22.f, DECK_WIDTH + 24.f, DECK_HEIGHT + 22.f), DECK_RADIUS + 6.f, color4(0, 0, 0, 72), none, 0.f);',
+            'drawCurvedRect(m_shell, CCRect(-8.f, -12.f, DECK_WIDTH + 16.f, DECK_HEIGHT + 16.f), DECK_RADIUS + 4.f, color4(0, 0, 0, 32), none, 0.f);',
+            'visual: subtle outer shadow')
+        src = r(src,
+            'drawCurvedRect(m_shell, CCRect(CONTENT_X, CARD_BOTTOM, CONTENT_WIDTH, CARD_HEIGHT), CARD_RADIUS, color4(surface, 255), color4(255, 255, 255, 18), 1.f);',
+            'drawCurvedRect(m_shell, CCRect(CONTENT_X, CARD_BOTTOM, CONTENT_WIDTH, CARD_HEIGHT), CARD_RADIUS, color4(surface, 250), color4(255, 255, 255, 10), 0.7f);',
+            'visual: flat content surface')
+
+        src = r(src,
+            'makeLabel(tabName(tabIndex), true, 0.66f, faintTextColor())',
+            'makeLabel(tabName(tabIndex), true, 0.76f, faintTextColor())',
+            'visual: readable navigation')
+        src = r(src,
+            'm_tabLabels[index]->setOpacity(isActive ? 255 : 185);',
+            'm_tabLabels[index]->setOpacity(isActive ? 255 : 215);',
+            'visual: legible inactive navigation')
+        src = r(src,
+            'color4(accentColor(), 26),\n            color4(accentColor(), 74),\n            1.f\n        );',
+            'color4(255, 255, 255, 14),\n            color4(255, 255, 255, 0),\n            0.f\n        );',
+            'visual: quiet tab indicator')
+        src = r(src,
+            'makeLabel("tight", true, 0.88f, color3(240, 241, 246))',
+            'makeLabel("tight", true, 1.08f, color3(240, 241, 246))',
+            'visual: stage headline')
+        src = r(src,
+            'makeLabel("01/08", true, 0.58f, accentColor())',
+            'makeLabel("01/08", true, 0.72f, softTextColor())',
+            'visual: stage index')
+        src = r(src,
+            'makeLabel("", false, 0.74f, softTextColor())',
+            'makeLabel("", false, 0.84f, softTextColor())',
+            'visual: stage explanation')
+        src = r(src,
+            'makeLabel(stageLabelAt(index), false, 0.58f, softTextColor())',
+            'makeLabel(stageLabelAt(index), false, 0.74f, softTextColor())',
+            'visual: stage chips')
+        src = r(src,
+            'makeLabel("all modes", false, 0.66f, softTextColor())',
+            'makeLabel("all modes", false, 0.82f, softTextColor())',
+            'visual: all-modes text')
+        src = r(src,
+            'makeLabel("wave", false, 0.66f, softTextColor())',
+            'makeLabel("wave", false, 0.82f, softTextColor())',
+            'visual: wave text')
+        src = r(src,
+            'makeLabel("tap a stage above to apply it", false, 0.60f, faintTextColor())',
+            'makeLabel("Select a preset or create a custom window", false, 0.67f, faintTextColor())',
+            'visual: useful footer')
+        src = r(src,
+            'makeLabel("0t", true, 0.62f, color3(240, 241, 246))',
+            'makeLabel("0t", true, 0.84f, color3(240, 241, 246))',
+            'visual: value typography')
+        src = r(src,
+            'm_tickValueLabels[row]->setScale(0.62f * getUIFontScale());',
+            'm_tickValueLabels[row]->setScale(0.84f * getUIFontScale());',
+            'visual: prevent refresh shrinking values')
+        src = r(src,
+            'makeLabel("+ custom", false, 0.62f, accentColor())',
+            'makeLabel("+ custom", false, 0.76f, accentColor())',
+            'visual: custom button')
+        src = r(src,
+            '''        m_stageTrack = makeDrawNode();
+        m_deck->addChild(m_stageTrack, 1);''',
+            '''        // Small section label clarifies the controls below the presets.
+        if (auto* section = makeLabel("PREDICTION WINDOWS", false, 0.62f, faintTextColor())) {
+            section->setAnchorPoint(CCPoint(0.f, 0.5f));
+            section->setPosition(CCPoint(LOG_X + 22.f, 195.f));
+            m_deck->addChild(section, 3);
+            m_stageTimingLabels[3] = section;
+        }
+        m_stageTrack = makeDrawNode();
+        m_deck->addChild(m_stageTrack, 1);''',
+            'visual: timing section label')
+        src = r(src,
+            'color4(selectedTint, 48),\n                color4(selectedTint, 150),',
+            'color4(selectedTint, 38),\n                color4(selectedTint, 62),',
+            'visual: subtle preset selected state')
+        src = r(src,
+            'color4(255, 255, 255, 7),\n                color4(255, 255, 255, 14),',
+            'color4(255, 255, 255, 8),\n                color4(255, 255, 255, 12),',
+            'visual: subtle preset rail')
+        src = r(src,
+            '''                    6.f,
+                    color4(255, 255, 255, 8),
+                    color4(255, 255, 255, 24),
+                    1.f''',
+            '''                    8.f,
+                    color4(255, 255, 255, 9),
+                    color4(255, 255, 255, 12),
+                    0.75f''',
+            'visual: unobtrusive value tiles')
+
+        # Simplify stage bars while preserving custom-stage drag behavior.
+        old_bar_start = '            auto drawBar = [&](int barIndex, float y, ccColor3B tint) {'
+        old_bar_end = '            drawBar(0, STAGE_TIMING_ALL_Y, live);'
+        if src.count(old_bar_start) != 1 or src.count(old_bar_end) != 1:
+            raise RuntimeError('Cannot locate stage bar renderer for visual polish.')
+        a = src.index(old_bar_start)
+        b = src.index(old_bar_end, a)
+        new_bar = '''            auto drawBar = [&](int barIndex, float y, ccColor3B tint) {
+                float const ticks = m_barShown[barIndex];
+                constexpr float h = 10.f;
+                drawCurvedRect(m_stageTrack,
+                    CCRect(STAGE_BAR_X, y - h * .5f, STAGE_BAR_WIDTH, h), 5.f,
+                    color4(255, 255, 255, 18), color4(0, 0, 0, 0), 0.f);
+                float ratio = std::clamp(ticks / static_cast<float>(barMax), 0.f, 1.f);
+                if (isCustomSelected) {
+                    ratio = std::clamp(
+                        (ticks - static_cast<float>(CUSTOM_TICKS_MIN)) /
+                        static_cast<float>(CUSTOM_TICKS_MAX - CUSTOM_TICKS_MIN), 0.f, 1.f);
+                }
+                if (ticks > 0.5f) {
+                    float const w = std::max(6.f, STAGE_BAR_WIDTH * ratio);
+                    drawCurvedRect(m_stageTrack,
+                        CCRect(STAGE_BAR_X, y - h * .5f, w, h), 5.f,
+                        color4(tint, 185), color4(0, 0, 0, 0), 0.f);
+                }
+                if (isCustomSelected) {
+                    float const knobX = STAGE_BAR_X + STAGE_BAR_WIDTH * ratio;
+                    m_stageTrack->drawCircle(CCPoint(knobX, y), 7.f,
+                        color4(244, 244, 250, 255), 0.f, color4(0, 0, 0, 0), 20);
+                    m_stageTrack->drawCircle(CCPoint(knobX, y), 3.f,
+                        color4(tint, 255), 0.f, color4(0, 0, 0, 0), 16);
+                }
+            };
+'''
+        src = src[:a] + new_bar + src[b:]
+        # End visual polish; engine input behavior is otherwise unchanged.
+
         # Settings page reset and save window options via Geode. Extra data exists even if HUD isn't a native render.
         modified_mod = json.dumps(info, ensure_ascii=False, indent=2) + '\n'
         # Only after every anchor was satisfied, commit both files.
