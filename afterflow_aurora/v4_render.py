@@ -24,15 +24,15 @@ V4_HIT = r'''
                 if(CCRect(x+182.f,105.f,30.f,27.f).containsPoint(p))return 301+i*2;
             }
         } else if(m_activeTab==2) {
-            if(CCRect(609.f,318.f,42.f,26.f).containsPoint(p))return 420;
+            if(CCRect(598.f,314.f,63.f,31.f).containsPoint(p))return 420;
             if(CCRect(591.f,237.f,30.f,28.f).containsPoint(p))return 430;
             if(CCRect(631.f,237.f,30.f,28.f).containsPoint(p))return 431;
             if(CCRect(401.f,237.f,184.f,28.f).containsPoint(p))return 432;
-            if(CCRect(481.f,179.f,83.f,30.f).containsPoint(p))return 421;
-            if(CCRect(574.f,179.f,89.f,30.f).containsPoint(p))return 422;
+            if(CCRect(433.f,180.f,111.f,32.f).containsPoint(p))return 421;
+            if(CCRect(553.f,180.f,111.f,32.f).containsPoint(p))return 422;
             for(int i=0;i<8;++i) {
-                if(CCRect(208.f+i%4*114.f,90.f-i/4*40.f,105.f,31.f).containsPoint(p))
-                    return 400+i;
+                CCRect row(203.f+i%2*239.f,125.f-i/2*31.f,230.f,28.f);
+                if(row.containsPoint(p))return 400+i;
             }
         } else if(m_activeTab==3) {
             if(CCRect(538.f,73.f,126.f,32.f).containsPoint(p))return 603;
@@ -100,6 +100,8 @@ V4_ACTION = r'''
 
     void AfterflowOverlay::v3Action(int id) {
         auto* mod=Mod::get();
+        if(id==420||id==421||id==422||(id>=400&&id<408))
+            m_v4ToggleAnim=id;
         if(id==900){closePanel();return;}
         if(id==901||id==420) {
             mod->setSettingValue<bool>("input-enabled",
@@ -248,8 +250,9 @@ V4_RENDER = r'''
                     .75f,secondary,true,110);
             }
             m_v4Indicator=makeDrawNode();
-            rect(m_v4Indicator,CCRect(0,0,3,27),1.5f,accent);
-            m_v4Chrome->addChild(m_v4Indicator,5);
+            rect(m_v4Indicator,CCRect(0,0,151,38),9,hexColor(0x242633));
+            rect(m_v4Indicator,CCRect(0,7,3,24),1.5f,accent);
+            m_v4Chrome->addChild(m_v4Indicator,1);
             line(back,25,59,155,59,22);
             title(m_v4Chrome,"ENGINE",28,43,.51f,muted);
             m_v4FooterLabel=title(m_v4Chrome,"READY",28,26,.69f,white,true,115);
@@ -275,13 +278,13 @@ V4_RENDER = r'''
             item->setOpacity(i==m_activeTab?255:185);
         }
         if(m_v4Indicator && m_v4RenderedTab!=m_activeTab) {
-            float y=331.f-m_activeTab*43.f;
+            float y=326.f-m_activeTab*43.f;
             m_v4Indicator->stopAllActions();
             if(m_v4RenderedTab<0 || mod->getSettingValue<bool>("aurora-reduce-motion")) {
-                m_v4Indicator->setPosition(CCPoint(18,y));
+                m_v4Indicator->setPosition(CCPoint(16,y));
             } else {
                 m_v4Indicator->runAction(CCEaseSineOut::create(
-                    CCMoveTo::create(.22f*uiMotion(),CCPoint(18,y))));
+                    CCMoveTo::create(.22f*uiMotion(),CCPoint(16,y))));
             }
         }
 
@@ -314,7 +317,23 @@ V4_RENDER = r'''
             rect(shape,r,9,chosen?active:card,chosen?0:9);
             centered(m_v4Page,s,r,scale,chosen?white:secondary);
         };
-        auto section=[&](std::string const& s,float y) {t(s,203,y,.51f,muted,true);};
+        auto section=[&](std::string const& s,float y) {t(s,203,y,.56f,muted,true);};
+        // Switches are native DrawNodes. Only the knob moves; no sprite or texture allocations.
+        auto toggle=[&](int id,CCRect track,bool on) {
+            rect(shape,track,track.size.height*.5f,
+                on?hexColor(0x484369):hexColor(0x383B48));
+            auto* thumb=makeDrawNode();
+            thumb->drawCircle(CCPoint(0,0),track.size.height*.37f,
+                color4(249,249,253,255),0.f,color4(0,0,0,0),20);
+            float left=track.getMinX()+track.size.height*.5f;
+            float right=track.getMaxX()-track.size.height*.5f;
+            float dest=on?right:left;
+            bool animate=m_v4ToggleAnim==id && !mod->getSettingValue<bool>("aurora-reduce-motion");
+            thumb->setPosition(CCPoint(animate?(on?left:right):dest,track.getMidY()));
+            m_v4Page->addChild(thumb,4);
+            if(animate)thumb->runAction(CCEaseSineOut::create(
+                CCMoveTo::create(.18f*uiMotion(),CCPoint(dest,track.getMidY()))));
+        };
         t(tabs[m_activeTab],203,418,1.06f,white,true,325);
 
         if(m_activeTab==0) {
@@ -387,8 +406,8 @@ V4_RENDER = r'''
             rect(shape,CCRect(203,297,471,66),12,card,10);
             t("Input correction",218,339,.78f,white,true);
             t("Master timing adjustment",218,315,.60f,muted);
-            b(CCRect(609,318,42,26),mod->getSettingValue<bool>("input-enabled")?"ON":"OFF",
-                mod->getSettingValue<bool>("input-enabled"),.64f);
+            toggle(420,CCRect(608,318,45,22),
+                mod->getSettingValue<bool>("input-enabled"));
             rect(shape,CCRect(203,225,471,65),12,card,10);
             t("Correction strength",218,264,.77f,white,true);
             double strength=mod->getSettingValue<double>("input-strength");
@@ -398,23 +417,25 @@ V4_RENDER = r'''
                 2.5f,accent);
             rect(shape,CCRect(405.f+(float)((strength-.5)*171.)-5.f,241,10,15),5,white);
             b(CCRect(591,237,30,28),"-");b(CCRect(631,237,30,28),"+");
-            section("INPUT ACTIONS",210);
-            b(CCRect(481,179,83,30),
-                mod->getSettingValue<bool>("input-presses")?"Press ON":"Press OFF",
-                mod->getSettingValue<bool>("input-presses"),.58f);
-            b(CCRect(574,179,89,30),
-                mod->getSettingValue<bool>("input-releases")?"Release ON":"Release OFF",
-                mod->getSettingValue<bool>("input-releases"),.58f);
-            section("ENABLED GAMEMODES",157);
+            section("INPUT EVENTS",211);
+            rect(shape,CCRect(433,180,111,32),9,card,8);
+            t("Press",444,196,.63f,white,true);
+            toggle(421,CCRect(497,188,37,16),
+                mod->getSettingValue<bool>("input-presses"));
+            rect(shape,CCRect(553,180,111,32),9,card,8);
+            t("Release",564,196,.63f,white,true);
+            toggle(422,CCRect(617,188,37,16),
+                mod->getSettingValue<bool>("input-releases"));
+            section("GAMEMODES",169);
             static char const* modes[]={"Cube","Ship","Ball","UFO","Wave","Robot","Spider","Swing"};
             for(int i=0;i<8;++i) {
-                CCRect rr(208.f+i%4*114.f,90.f-i/4*40.f,105.f,31.f);
+                CCRect rr(203.f+i%2*239.f,125.f-i/2*31.f,230.f,28.f);
                 bool isOn=mod->getSettingValue<bool>(fmt::format("input-{}",AURORA_MODES[i]));
-                b(rr,modes[i],isOn,.66f);
-                shape->drawCircle(CCPoint(rr.getMinX()+10,rr.getMidY()),
-                    2.7f,color4(isOn?accent:muted),0.f,color4(0,0,0,0),12);
+                rect(shape,rr,8,card,5);
+                t(modes[i],rr.getMinX()+13,rr.getMidY(),.68f,isOn?white:secondary,true);
+                toggle(400+i,CCRect(rr.getMaxX()-48,rr.getMinY()+6,37,16),isOn);
             }
-            t("Changes apply to the active engine and are saved by Geode.",204,42,.55f,muted);
+            t("Each gamemode can be enabled independently.",203,18,.57f,muted);
         } else if(m_activeTab==3) {
             t("Local diagnostics from the live correction queue.",204,383,.67f,secondary);
             for(int i=0;i<3;++i) {
@@ -493,6 +514,7 @@ V4_RENDER = r'''
             b(CCRect(567,44,43,28),"-");b(CCRect(617,44,43,28),"+");
             t("Afterflow by sevend and contributors",203,23,.53f,muted);
         }
+        m_v4ToggleAnim=-1;
         if(previousTab>=0 && previousTab!=m_activeTab &&
            !mod->getSettingValue<bool>("aurora-reduce-motion")) {
             m_v4Page->setOpacity(0);
