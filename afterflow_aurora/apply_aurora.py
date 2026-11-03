@@ -772,6 +772,11 @@ def update(root: Path):
         src = src[:a] + new_bar + src[b:]
         # End visual polish; engine input behavior is otherwise unchanged.
 
+        # This fork must never silently reinstall the upstream release over Aurora.
+        src = r(src, '    void checkForUpdates(bool isLoud) {',
+            '    void checkForUpdates(bool isLoud) {\\n        (void)isLoud;\\n        return; // Aurora V3: disable upstream auto-update and rollback.',
+            'prevent upstream overwriting custom Aurora builds')
+
         # V3: replace the previous visual hierarchy with a genuinely new sidebar UI.
         from v3_shell import patch_string
         src = patch_string(src)
