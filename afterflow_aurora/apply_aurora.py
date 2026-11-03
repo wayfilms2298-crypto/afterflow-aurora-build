@@ -52,6 +52,13 @@ def update(root: Path):
             settings[f'aurora-{mode}-press'] = {'type':'bool','name':f'{mode}: correct presses','default':True}
             settings[f'aurora-{mode}-release'] = {'type':'bool','name':f'{mode}: correct releases','default':True}
         info['description'] = 'Afterflow Aurora: adaptive prediction controls, session diagnostics, command search, profiles and fluid UI.'
+        # Distinguish this fork from official Afterflow and previous Aurora builds.
+        # Geode caches compiled DLLs by mod identity/version, so a unique version
+        # is essential when installing over a 2.2.0 custom build.
+        info['name'] = 'Afterflow Aurora'
+        info['version'] = '3.0.0'
+        info['description'] = 'Aurora V3: redesigned sidebar UI, native input controls, profiles, and telemetry. Based on Afterflow by sevend.'
+
 
         # New state helpers live inside the original anonymous namespace.
         src = r(src, '    constexpr int MOD_HOOK_PRIORITY = -1000000;', '''    // AURORA_EXTENSION_V1: telemetry measures input events and QUEUED corrections,
