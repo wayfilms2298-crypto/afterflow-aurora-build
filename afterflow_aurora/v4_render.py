@@ -20,8 +20,8 @@ V4_HIT = r'''
             }
             if(customStageFor(state.stageIndex))for(int i=0;i<2;++i) {
                 float x=i?445.f:205.f;
-                if(CCRect(x+145.f,88.f,30.f,27.f).containsPoint(p))return 300+i*2;
-                if(CCRect(x+182.f,88.f,30.f,27.f).containsPoint(p))return 301+i*2;
+                if(CCRect(x+145.f,105.f,30.f,27.f).containsPoint(p))return 300+i*2;
+                if(CCRect(x+182.f,105.f,30.f,27.f).containsPoint(p))return 301+i*2;
             }
         } else if(m_activeTab==2) {
             if(CCRect(609.f,318.f,42.f,26.f).containsPoint(p))return 420;
