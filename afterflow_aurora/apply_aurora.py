@@ -765,6 +765,10 @@ def update(root: Path):
         src = src[:a] + new_bar + src[b:]
         # End visual polish; engine input behavior is otherwise unchanged.
 
+        # V3: replace the previous visual hierarchy with a genuinely new sidebar UI.
+        from v3_shell import patch_string
+        src = patch_string(src)
+
         # Settings page reset and save window options via Geode. Extra data exists even if HUD isn't a native render.
         modified_mod = json.dumps(info, ensure_ascii=False, indent=2) + '\n'
         # Only after every anchor was satisfied, commit both files.
