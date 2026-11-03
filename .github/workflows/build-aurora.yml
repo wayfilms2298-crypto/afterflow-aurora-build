@@ -50,6 +50,20 @@ jobs:
             throw "The source was not upgraded; refusing to build original Afterflow."
           }
 
+      - name: Package complete V4 source project
+        shell: pwsh
+        run: |
+          $source = "$env:GITHUB_WORKSPACE/afterflow-source"
+          Compress-Archive -Path "$source/*" -DestinationPath "$env:GITHUB_WORKSPACE/Afterflow-Aurora-V4-Source.zip" -Force
+
+      - name: Publish editable V4 source
+        uses: actions/upload-artifact@v4
+        with:
+          name: Afterflow-Aurora-V4-Source
+          path: Afterflow-Aurora-V4-Source.zip
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Build using Geode
         uses: geode-sdk/build-geode-mod@main
         id: build
