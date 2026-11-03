@@ -774,7 +774,9 @@ def update(root: Path):
 
         # This fork must never silently reinstall the upstream release over Aurora.
         src = r(src, '    void checkForUpdates(bool isLoud) {',
-            '    void checkForUpdates(bool isLoud) {\\n        (void)isLoud;\\n        return; // Aurora V3: disable upstream auto-update and rollback.',
+            '''    void checkForUpdates(bool isLoud) {
+        (void)isLoud;
+        return; // Aurora V3: disable upstream auto-update and rollback.''',
             'prevent upstream overwriting custom Aurora builds')
 
         # V3: replace the previous visual hierarchy with a genuinely new sidebar UI.
