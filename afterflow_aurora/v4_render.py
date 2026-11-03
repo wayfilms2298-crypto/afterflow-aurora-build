@@ -215,9 +215,20 @@ V4_RENDER = r'''
             return label;
         };
 
+        // Palette changes rebuild only static chrome; normal data updates retain it.
+        if(m_v4Chrome && m_v4Accent!=palette) {
+            m_v4Chrome->removeFromParentAndCleanup(true);
+            m_v4Chrome=nullptr;
+            m_v4Indicator=nullptr;
+            m_v4StateLabel=nullptr;
+            m_v4FooterLabel=nullptr;
+            for(auto& label:m_v4NavLabels)label=nullptr;
+            m_v4RenderedTab=-1;
+        }
         static char const* tabs[]={"Activity","Stages","Controls","Insights","Commands","Presets","Appearance"};
         static char const* tabIds[]={"01","02","03","04","05","06","07"};
         if(!m_v4Chrome) {
+            m_v4Accent=palette;
             m_v4Chrome=CCNode::create();
             m_v3Root->addChild(m_v4Chrome,0);
             auto* back=makeDrawNode();
@@ -263,7 +274,7 @@ V4_RENDER = r'''
             item->setColor(i==m_activeTab?white:secondary);
             item->setOpacity(i==m_activeTab?255:185);
         }
-        if(m_v4Indicator) {
+        if(m_v4Indicator && m_v4RenderedTab!=m_activeTab) {
             float y=331.f-m_activeTab*43.f;
             m_v4Indicator->stopAllActions();
             if(m_v4RenderedTab<0 || mod->getSettingValue<bool>("aurora-reduce-motion")) {
