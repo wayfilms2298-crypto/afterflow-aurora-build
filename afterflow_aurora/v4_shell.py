@@ -66,6 +66,8 @@ def patch_string(src: str) -> str:
         CCNodeRGBA* m_v4Page = nullptr;
         CCDrawNode* m_v4Indicator = nullptr;
         CCNode* m_v4Header = nullptr;
+        CCLabelBMFont* m_v4StateLabel = nullptr;
+        CCLabelBMFont* m_v4FooterLabel = nullptr;
         CCLabelBMFont* m_v4NavLabels[7] = {};
         int m_v4RenderedTab = -1;
         int m_v4Accent = 0;
@@ -89,6 +91,8 @@ def patch_string(src: str) -> str:
         m_v4Page = nullptr;
         m_v4Indicator = nullptr;
         m_v4Header = nullptr;
+        m_v4StateLabel = nullptr;
+        m_v4FooterLabel = nullptr;
         m_v4RenderedTab = -1;
         for (auto& label : m_v4NavLabels) label = nullptr;
         m_v3Root = CCNode::create();
