@@ -71,6 +71,7 @@ def patch_string(src: str) -> str:
         CCLabelBMFont* m_v4NavLabels[7] = {};
         int m_v4RenderedTab = -1;
         int m_v4Accent = 0;
+        int m_v4ToggleAnim = -1;
         bool m_v4LastEnabled = false;
         void v4Notify(std::string const& message);
         void v4StrengthAt(float x);""",
