@@ -13,7 +13,7 @@ def replace_definition(source: str, signature: str, replacement: str) -> str:
     if source.count(signature) != 1:
         raise RuntimeError(f"V4 expected exactly one method: {signature}")
     a = source.index(signature)
-    brace = source.index("{", a + len(signature))
+    brace = source.index("{", a)  # Include the method opening brace in depth accounting
     depth = 0
     quote = ""
     escaped = False
