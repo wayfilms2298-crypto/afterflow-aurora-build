@@ -782,6 +782,11 @@ def update(root: Path):
         # V3: replace the previous visual hierarchy with a genuinely new sidebar UI.
         from v3_shell import patch_string
         src = patch_string(src)
+        from v4_shell import patch_string as patch_v4
+        src = patch_v4(src)
+        info['name'] = 'Afterflow Aurora'
+        info['version'] = '4.0.0'
+        info['description'] = 'Afterflow Aurora V4: retained native workspace, redesigned navigation, input controls, profiles, and local diagnostics. Based on Afterflow by sevend.'
 
         # Settings page reset and save window options via Geode. Extra data exists even if HUD isn't a native render.
         modified_mod = json.dumps(info, ensure_ascii=False, indent=2) + '\n'
